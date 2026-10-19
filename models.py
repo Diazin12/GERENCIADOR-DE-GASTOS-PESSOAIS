@@ -38,6 +38,23 @@ def buscar_usuario_por_id(id_usuario):
     finally:
         conexao.close()
 
+def salvar_usuario(nome, email, senha_hash):
+    conexao = None
+    try:
+        with conectar() as conexao:
+            cursor = conexao.cursor()
+            cursor.execute("INSERT INTO usuario (nome, email, senha_hash) VALUES (?, ?, ?)",
+                           (nome, email, senha_hash)
+                           )
+        return True
+
+    except sqlite3.IntegrityError:
+        return False
+
+    finally:
+        if conexao is not None:
+            conexao.close()
+
 def criar_tabelas():
     conexao = None
     try:
