@@ -55,6 +55,25 @@ def salvar_usuario(nome, email, senha_hash):
         if conexao is not None:
             conexao.close()
 
+def buscar_usuario_por_email(email):
+    conexao = None
+    try:
+        with conectar() as conexao:
+            cursor = conexao.cursor()
+            cursor.execute("SELECT id, nome, email, senha_hash FROM usuario WHERE email = ?",
+                           (email,)
+                           )
+            usuario = cursor.fetchone()
+
+            if usuario is None:
+                return None
+
+            return Usuario.from_tupla(usuario)
+
+    finally:
+        if conexao is not None:
+            conexao.close()
+
 def criar_tabelas():
     conexao = None
     try:
