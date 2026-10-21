@@ -74,6 +74,48 @@ def buscar_usuario_por_email(email):
         if conexao is not None:
             conexao.close()
 
+
+def listar_gastos_usuario(id_usuario):
+    conexao = None
+    try:
+        with conectar() as conexao:
+            cursor  = conexao.cursor()
+            cursor.execute(
+                """
+                SELECT id, descricao, valor, categoria, data 
+                FROM gastos
+                WHERE usuario_id = ?
+                ORDER BY data DESC
+                """,
+                (id_usuario,)
+            )
+            gastos = cursor.fetchall()
+            return gastos
+
+    finally:
+        if conexao is not None:
+            conexao.close()
+
+def salvar_gasto(descricao, valor, categoria, data, usuario_id):
+    conexao = None
+    try:
+        with conectar() as conexao:
+            cursor = conexao.cursor()
+            cursor.execute(
+                "INSERT INTO gastos (descricao, valor, categoria, data, usuario_id) VALUES (?, ?, ?, ?, ?)",
+                (descricao, valor, categoria, data, usuario_id)
+            )
+
+            return True
+        
+    except sqlite3.IntegrityError:
+        return False
+    
+    finally:
+        if conexao is not None:
+            conexao.close()
+        
+
 def criar_tabelas():
     conexao = None
     try:

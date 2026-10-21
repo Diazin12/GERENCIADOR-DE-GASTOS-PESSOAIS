@@ -10,6 +10,14 @@
     <div class = "cabecalho">
 
         <h1> Login de Usuario </h1>
+
+        {% with mensagens = get_flashed_messages() %}
+            {% if mensagens %}
+                {% for mensagem in mensagens %}
+                    <p>{{ mensagem }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
         
         <form method = "POST">
             <label for = "email"> Digite seu e-mail </label> <br>

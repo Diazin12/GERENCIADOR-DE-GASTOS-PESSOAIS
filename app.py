@@ -1,6 +1,6 @@
-from models import criar_tabelas, buscar_usuario_por_id, salvar_usuario, buscar_usuario_por_email
+from models import criar_tabelas, buscar_usuario_por_id, salvar_usuario, buscar_usuario_por_email, listar_gastos_usuario
 from flask import Flask, render_template, request, redirect, url_for, flash
-from flask_login import LoginManager, login_user
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
@@ -72,11 +72,22 @@ def login():
         login_user(usuario)
         flash("Login realizado com sucesso.")
 
+        return redirect(url_for("dashboard"))
+
     return render_template("login.html")
 
-app.route('/dashboard', methods = ['GET', 'POST'])
+@app.route('/dashboard', methods = ['GET'])
+@login_required
 def dashboard():
-    return render_template("dashboard.html")
+    gastos = listar_gastos_usuario(current_user.id)
+    return render_template("dashboard.html", gastos = gastos)
+
+@app.route('/logout', methods = ['POST'])
+@login_required
+def logout():
+    logout_user()
+    flash("Você saiu da sua conta.")
+    return redirect(url_for("login"))
 
 
 if __name__ == '__main__':

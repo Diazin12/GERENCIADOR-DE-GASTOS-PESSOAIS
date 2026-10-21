@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Dashboard </title>
+</head>
+<body>
+    <main>
+    <h1>Meus gastos</h1>
+
+    {% if gastos %}
+        <ul>
+            {% for gasto in gastos %}
+                <li>
+                    {{ gasto[1] }} — R$ {{ "%.2f"|format(gasto[2]) }}
+                    — {{ gasto[3] }} — {{ gasto[4] }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Nenhum gasto cadastrado.</p>
+    {% endif %}
+        <div class = 'container'>
+
+            {% with mensagens = get_flashed_messages() %}
+                {% if mensagens %}
+                    {% for mensagem in mensagens %}
+                        <p>{{ mensagem }}</p>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method = "POST" action="{{ url_for ('logout') }}">
+                <button type="submit">Sair</button>
+            </form>
+
+        </div>
+
+    </main>
+
+</body>
+</html>
