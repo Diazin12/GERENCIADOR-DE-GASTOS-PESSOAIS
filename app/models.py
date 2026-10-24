@@ -14,7 +14,10 @@ class Usuario(UserMixin):
     def from_tupla(cls, tupla):
         return cls(*tupla)
 
-CAMINHO_BANCO = os.path.join(os.path.dirname(__file__), "gastos.db")
+PASTA_PROJETO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PASTA_DADOS = os.path.join(PASTA_PROJETO, "data")
+os.makedirs(PASTA_DADOS, exist_ok=True)
+CAMINHO_BANCO = os.path.join(PASTA_DADOS, "gastos.db")
 
 def conectar():
     return sqlite3.connect(CAMINHO_BANCO)

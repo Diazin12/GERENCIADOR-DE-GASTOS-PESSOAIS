@@ -2,19 +2,24 @@ from models import criar_tabelas, buscar_usuario_por_id, salvar_usuario, buscar_
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+import os
 
 app = Flask(__name__)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 
-app.secret_key = 'paquito1@#'
+app.secret_key = os.environ["SECRET_KEY"]
 
 criar_tabelas()
 
 @login_manager.user_loader
 def carregar_usuario(id_usuario):
     return buscar_usuario_por_id(id_usuario)
+
+@app.route('/')
+def inicio():
+    return redirect(url_for("cadastro"))
 
 @app.route('/cadastro', methods = ['GET', 'POST'])
 def cadastro():
@@ -235,5 +240,5 @@ def remover_gasto(gasto_id):
 
 if __name__ == '__main__':
 
-    app.run(debug=True, port=5012)
+    app.run(host = "0.0.0.0", debug=True, port=5000)
 

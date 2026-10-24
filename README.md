@@ -57,24 +57,65 @@ Instale as dependências:
 python -m pip install -r requirements.txt
 ```
 
-Inicie a aplicação:
+Inicie a aplicação a partir da pasta principal do projeto:
 
 ```bash
-python app.py
+export SECRET_KEY="$(python3 -c 'import secrets; print(secrets.token_hex(32))')"
+python app/app.py
 ```
 
-Abra [http://127.0.0.1:5012](http://127.0.0.1:5012) no navegador. Crie uma conta para começar a usar o sistema.
+Abra [http://127.0.0.1:5000](http://127.0.0.1:5000) no navegador. Crie uma conta para começar a usar o sistema.
 
-O banco de dados SQLite (`gastos.db`) e as tabelas são criados pela aplicação ao iniciar.
+Ao iniciar, a aplicação cria as tabelas no banco SQLite `data/gastos.db`. A pasta `data/` também é criada automaticamente caso ainda não exista.
+
+## Como executar com Docker
+
+O projeto também pode ser iniciado com Docker Compose. Antes da primeira execução, crie o arquivo `.env` na pasta principal e coloque nele uma chave secreta gerada por você:
+
+```bash
+python3 -c "import secrets; print(secrets.token_hex(32))"
+```
+
+Copie o valor exibido e salve no `.env` neste formato, sem espaços ao redor do `=`:
+
+```env
+SECRET_KEY=cole_a_chave_gerada_aqui
+```
+
+O `.env` está no `.dockerignore` e no `.gitignore`; não publique nem compartilhe esse arquivo.
+
+Construa a imagem e inicie a aplicação:
+
+```bash
+docker compose up --build
+```
+
+Abra [http://127.0.0.1:5001](http://127.0.0.1:5001). O Compose publica a porta `5001` do computador na porta `5000` do contêiner. Para parar a aplicação, pressione `Ctrl+C` ou execute `docker compose down` em outro terminal. Para iniciá-la em segundo plano, use `docker compose up -d`.
+
+O Compose monta `./data` em `/app/data`, onde o app grava `gastos.db`. Assim, o arquivo SQLite permanece na pasta `data/` do projeto mesmo quando o contêiner é recriado. Ele também monta `./app` no contêiner para disponibilizar os arquivos da aplicação.
 
 ## Estrutura do projeto
 
 ```text
 gerenciador-de-gastos/
-├── app.py
-├── models.py
-├── requirements.txt
-├── README.md
+├── app/
+│   ├── app.py
+│   ├── models.py
+│   ├── static/
+│   │   ├── css/style.css
+│   │   └── js/
+│   │       ├── cadastro.js
+│   │       ├── dashboard-filters.js
+│   │       └── dashboard.js
+│   └── templates/
+│       ├── base.html
+│       ├── cadastro.html
+│       ├── dashboard.html
+│       ├── form_gasto.html
+│       ├── gastos.html
+│       └── login.html
+├── data/
+│   └── gastos.db  (criado ao iniciar a aplicação)
 ├── docs/
 │   └── images/
 │       ├── cadastro.png
@@ -82,21 +123,14 @@ gerenciador-de-gastos/
 │       ├── dashboard-vazio.png
 │       ├── dashboard-com-gastos.png
 │       └── editar-gasto.png
-├── static/
-│   ├── css/style.css
-│   └── js/
-│       ├── cadastro.js
-│       ├── dashboard-filters.js
-│       └── dashboard.js
-└── templates/
-    ├── base.html
-    ├── cadastro.html
-    ├── dashboard.html
-    ├── form_gasto.html
-    ├── gastos.html
-    └── login.html
+├── requirements.txt
+├── Dockerfile
+├── compose.yaml
+├── .dockerignore
+├── README.md
+└── .gitignore
 ```
 
 ## Uso de inteligência artificial
 
-Usei uma ferramenta de inteligência artificial como apoio na criação e estilização do front-end com Bootstrap e JavaScript, incluindo o gráfico. As funcionalidades em Python foram desenvolvidas completamentes por mim.
+Usei uma ferramenta de inteligência artificial como apoio na criação e estilização do front-end com Bootstrap e JavaScript, incluindo o gráfico. As funcionalidades em Python foram desenvolvidas completamente por mim.
