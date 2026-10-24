@@ -1,4 +1,4 @@
-from models import criar_tabelas, buscar_usuario_por_id, salvar_usuario, buscar_usuario_por_email, listar_gastos_usuario, salvar_gasto, atualizar_gasto, buscar_gasto_por_id
+from models import criar_tabelas, buscar_usuario_por_id, salvar_usuario, buscar_usuario_por_email, listar_gastos_usuario, salvar_gasto, atualizar_gasto, buscar_gasto_por_id, excluir_gasto
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -199,6 +199,18 @@ def editar_gasto(gasto_id):
     
 
     return render_template("form_gasto.html", gasto=gasto)
+
+@app.route('/gasto/excluir/<int:gasto_id>', methods = ['POST'])
+@login_required
+def remover_gasto(gasto_id):
+    removido = excluir_gasto(gasto_id, current_user.id)
+
+    if removido:
+        flash("Gasto removido com sucesso!")
+    else:
+        flash("Gasto não encontrado ou não pertence a você.")
+
+    return redirect(url_for("dashboard"))
 
 
 
