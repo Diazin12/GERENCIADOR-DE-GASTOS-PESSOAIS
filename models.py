@@ -114,8 +114,60 @@ def salvar_gasto(descricao, valor, categoria, data, usuario_id):
     finally:
         if conexao is not None:
             conexao.close()
-        
 
+def atualizar_gasto(gasto_id, descricao, valor, categoria, data, usuario_id):
+    conexao = conectar()
+
+    try:
+        cursor = conexao.cursor()
+        cursor.execute(
+            """
+            UPDATE gastos
+            SET descricao = ?, valor = ?, categoria = ?, data = ?
+            WHERE id = ? AND usuario_id = ?
+            """,
+            (descricao, valor, categoria, data, gasto_id, usuario_id)
+        )
+        conexao.commit()
+        return cursor.rowcount > 0
+
+    finally:
+        if conexao is not None:
+            conexao.close()
+
+def buscar_gasto_por_id(gasto_id, usuario_id):
+    conexao = conectar()
+
+    try:
+        cursor = conexao.cursor()
+        cursor.execute(
+            """
+            SELECT id, descricao, valor, categoria, data
+            FROM gastos
+            WHERE id = ? AND usuario_id = ?
+            """,
+            (gasto_id, usuario_id)
+        )
+
+        return cursor.fetchone()
+
+    finally:
+        if conexao is not None:
+            conexao.close()
+
+def excluir_gasto(gasto_id, usuario_id):
+    conexao = conectar()
+    try:
+        cursor = conexao.cursor()
+        cursor.execute("DELETE FROM gastos WHERE id = ? AND usuario_id = ?",
+                       (gasto_id, usuario_id)
+                       )
+        conexao.commit()
+        return cursor.rowcount > 0
+
+    finally:
+        conexao.close()
+        
 def criar_tabelas():
     conexao = None
     try:

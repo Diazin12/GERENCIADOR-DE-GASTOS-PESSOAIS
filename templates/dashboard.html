@@ -8,6 +8,7 @@
 <body>
     <main>
     <h1>Meus gastos</h1>
+    <a href="{{ url_for('novo_gasto') }}">Adicionar gasto</a>
 
     {% if gastos %}
         <ul>
@@ -15,6 +16,7 @@
                 <li>
                     {{ gasto[1] }} — R$ {{ "%.2f"|format(gasto[2]) }}
                     — {{ gasto[3] }} — {{ gasto[4] }}
+                    <a href="{{ url_for('editar_gasto', gasto_id=gasto[0]) }}">Editar</a>
                 </li>
             {% endfor %}
         </ul>

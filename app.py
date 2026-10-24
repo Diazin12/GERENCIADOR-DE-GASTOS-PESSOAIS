@@ -1,4 +1,4 @@
-from models import criar_tabelas, buscar_usuario_por_id, salvar_usuario, buscar_usuario_por_email, listar_gastos_usuario
+from models import criar_tabelas, buscar_usuario_por_id, salvar_usuario, buscar_usuario_por_email, listar_gastos_usuario, salvar_gasto, atualizar_gasto, buscar_gasto_por_id
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -89,7 +89,120 @@ def logout():
     flash("Você saiu da sua conta.")
     return redirect(url_for("login"))
 
+@app.route('/gastos/novo', methods = ['GET', 'POST'])
+@login_required
+def novo_gasto():
+    if request.method == 'POST':
+        descricao = request.form.get('descricao', '').strip()
+        valor_texto = request.form.get('valor', '').strip()
+        categoria = request.form.get('categoria', '').strip()
+        data = request.form.get('data', '').strip()
+
+        if descricao == '':
+            flash("Digite uma descrição.")
+            return render_template("form_gasto.html")
+
+        if valor_texto == '':
+            flash("Digite um valor.")
+            return render_template("form_gasto.html")
+
+        try:
+            valor = float(valor_texto)
+        except ValueError:
+            flash("Digite um valor válido.")
+            return render_template("form_gasto.html")
+
+        if valor <= 0:
+            flash("O valor precisa ser maior que zero.")
+            return render_template("form_gasto.html")
+
+        if categoria == '':
+            flash("Selecione uma categoria.")
+            return render_template("form_gasto.html")
+
+        if data == '':
+            flash("Digite uma data.")
+            return render_template("form_gasto.html")
+
+        salvo = salvar_gasto(
+            descricao,
+            valor,
+            categoria,
+            data,
+            current_user.id
+        )
+
+        if not salvo:
+            flash("Não foi possível salvar o gasto.")
+            return render_template("form_gasto.html")
+
+        flash("Gasto cadastrado com sucesso.")
+        return redirect(url_for("dashboard"))
+
+    return render_template("form_gasto.html")
+
+@app.route('/gastos/editar/<int:gasto_id>', methods = ['GET', 'POST'])
+@login_required
+def editar_gasto(gasto_id):
+    gasto = buscar_gasto_por_id(gasto_id, current_user.id)
+    if gasto is None:
+        flash("Gasto nao encontrado.")
+        return redirect(url_for("dashboard"))
+
+    if request.method == 'POST':
+        descricao = request.form.get('descricao', '').strip()
+        valor_texto = request.form.get('valor', '').strip()
+        categoria = request.form.get('categoria', '').strip()
+        data = request.form.get('data', '').strip()
+    
+        if descricao == '':
+            flash("Digite uma descrição.")
+            return render_template("form_gasto.html", gasto=gasto)
+    
+        if valor_texto == '':
+            flash("Digite um valor.")
+            return render_template("form_gasto.html", gasto=gasto)
+    
+        try:
+            valor = float(valor_texto)
+        except ValueError:
+            flash("Digite um valor válido.")
+            return render_template("form_gasto.html", gasto=gasto)
+    
+        if valor <= 0:
+            flash("O valor precisa ser maior que zero.")
+            return render_template("form_gasto.html", gasto=gasto)
+    
+        if categoria == '':
+            flash("Selecione uma categoria.")
+            return render_template("form_gasto.html", gasto=gasto)
+    
+        if data == '':
+            flash("Digite uma data.")
+            return render_template("form_gasto.html", gasto=gasto)
+
+        atualizado = atualizar_gasto(
+            gasto_id,
+            descricao,
+            valor,
+            categoria,
+            data,
+            current_user.id
+        )
+
+        if not atualizado:
+            flash("Não foi possível atualizar o gasto.")
+            return render_template("form_gasto.html", gasto=gasto)
+
+        flash("Gasto atualizado com sucesso.")
+        return redirect(url_for("dashboard"))
+    
+
+    return render_template("form_gasto.html", gasto=gasto)
+
+
 
 if __name__ == '__main__':
+
     app.run(debug=True, port=5012)
 

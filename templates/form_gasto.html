@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if gasto %}Editar gasto{% else %}Novo gasto{% endif %}</title>
+</head>
+<body>
+    <main>
+        <h1>{% if gasto %}Editar gasto{% else %}Cadastrar gasto{% endif %}</h1>
+
+        {% with mensagens = get_flashed_messages() %}
+            {% if mensagens %}
+                {% for mensagem in mensagens %}
+                    <p>{{ mensagem }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+            <label for="descricao">Descrição</label>
+            <input
+                id="descricao"
+                name="descricao"
+                type="text"
+                value="{{ gasto[1] if gasto else '' }}"
+                required
+            >
+
+            <label for="valor">Valor</label>
+            <input
+                id="valor"
+                name="valor"
+                type="number"
+                step="0.01"
+                min="0.01"
+                value="{{ gasto[2] if gasto else '' }}"
+                required
+            >
+
+            <label for="categoria">Categoria</label>
+            <select id="categoria" name="categoria" required>
+                <option value="">Selecione</option>
+                <option value="Alimentação" {% if gasto and gasto[3] == "Alimentação" %}selected{% endif %}>Alimentação</option>
+                <option value="Transporte" {% if gasto and gasto[3] == "Transporte" %}selected{% endif %}>Transporte</option>
+                <option value="Moradia" {% if gasto and gasto[3] == "Moradia" %}selected{% endif %}>Moradia</option>
+                <option value="Lazer" {% if gasto and gasto[3] == "Lazer" %}selected{% endif %}>Lazer</option>
+                <option value="Saúde" {% if gasto and gasto[3] == "Saúde" %}selected{% endif %}>Saúde</option>
+                <option value="Outros" {% if gasto and gasto[3] == "Outros" %}selected{% endif %}>Outros</option>
+            </select>
+
+            <label for="data">Data</label>
+            <input
+                id="data"
+                name="data"
+                type="date"
+                value="{{ gasto[4] if gasto else '' }}"
+                required
+            >
+
+            <button type="submit">
+                {% if gasto %}Salvar alterações{% else %}Salvar gasto{% endif %}
+            </button>
+        </form>
+
+        <a href="{{ url_for('dashboard') }}">Voltar ao dashboard</a>
+    </main>
+</body>
+</html>
