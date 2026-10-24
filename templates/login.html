@@ -1,36 +1,29 @@
-<!DOCTYPE html>
-<html lang="pt-br
-">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Login </title>
-</head>
-<body>
-    <div class = "cabecalho">
+{% extends "base.html" %}
 
-        <h1> Login de Usuario </h1>
+{% block title %}Entrar{% endblock %}
 
-        {% with mensagens = get_flashed_messages() %}
-            {% if mensagens %}
-                {% for mensagem in mensagens %}
-                    <p>{{ mensagem }}</p>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-        
-        <form method = "POST">
-            <label for = "email"> Digite seu e-mail </label> <br>
-            <input type = "email" id = "email" name = "email" placeholder = "Email de usuario">
-            <br><br>
+{% block content %}
+<section class="auth-layout">
+    <div class="auth-card">
+        <div class="auth-card-heading">
+            <span class="eyebrow">BEM-VINDO DE VOLTA</span>
+            <h1>Entrar</h1>
+            <p>Seu segundo projeto em Python começa por aqui.</p>
+        </div>
 
-            <label for = "senha"> Digite sua senha </label> <br>
-            <input type = "password" id = "senha" name = "senha" placeholder = "Senha de usuario">
-            <br><br>
-
-            <button type = "submit"> Entrar </button>
+        <form method="POST" class="form-stack">
+            <div>
+                <label class="form-label" for="email">E-mail</label>
+                <input class="form-control form-control-lg" id="email" type="email" name="email" placeholder="voce@exemplo.com" autocomplete="email" required>
+            </div>
+            <div>
+                <label class="form-label" for="senha">Senha</label>
+                <input class="form-control form-control-lg" id="senha" type="password" name="senha" placeholder="Sua senha" autocomplete="current-password" required>
+            </div>
+            <button class="btn btn-primary btn-lg w-100" type="submit">Entrar</button>
         </form>
 
+        <p class="auth-footer">Ainda não tem conta? <a href="{{ url_for('cadastro') }}">Cadastre-se</a></p>
     </div>
-</body>
-</html>
+</section>
+{% endblock %}

@@ -1,45 +1,154 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Dashboard </title>
-</head>
-<body>
-    <main>
-    <h1>Meus gastos</h1>
-    <a href="{{ url_for('novo_gasto') }}">Adicionar gasto</a>
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<section class="page-heading d-flex flex-column flex-md-row align-items-md-end justify-content-between gap-3">
+    <div>
+        <span class="eyebrow">VISÃO GERAL</span>
+        <h1>Resumo dos gastos</h1>
+        <p>Acompanhe para onde está indo o seu dinheiro.</p>
+    </div>
+    <a class="btn btn-primary" href="{{ url_for('novo_gasto') }}">
+        <span aria-hidden="true">＋</span> Novo gasto
+    </a>
+</section>
+
+<section class="panel filter-panel" aria-label="Filtros de gastos">
+    <form class="row g-3 align-items-start" id="formFiltros" method="GET" action="{{ url_for('dashboard') }}">
+        <div class="col-12 col-md-5 col-lg-4">
+            <label class="form-label" for="dataFiltro">Data</label>
+            <input class="form-control" id="dataFiltro" name="data" type="date" value="{{ request.args.get('data', '') }}">
+            <input id="mes" name="mes" type="hidden" value="{{ mes or '' }}">
+            <div class="form-text">Mostra os gastos do mês da data escolhida.</div>
+        </div>
+        <div class="col-12 col-md-4 col-lg-4">
+            <label class="form-label" for="categoria">Categoria</label>
+            <select class="form-select" id="categoria" name="categoria">
+                <option value="" {% if not categoria %}selected{% endif %}>Todas as categorias</option>
+                <option value="Alimentação" {% if categoria == 'Alimentação' %}selected{% endif %}>Alimentação</option>
+                <option value="Transporte" {% if categoria == 'Transporte' %}selected{% endif %}>Transporte</option>
+                <option value="Moradia" {% if categoria == 'Moradia' %}selected{% endif %}>Moradia</option>
+                <option value="Lazer" {% if categoria == 'Lazer' %}selected{% endif %}>Lazer</option>
+                <option value="Saúde" {% if categoria == 'Saúde' %}selected{% endif %}>Saúde</option>
+                <option value="Outros" {% if categoria == 'Outros' %}selected{% endif %}>Outros</option>
+            </select>
+        </div>
+        <div class="col-12 col-md-3 col-lg-4 d-flex gap-2 filter-actions">
+            <button class="btn btn-primary flex-grow-1 flex-md-grow-0" type="submit">Filtrar</button>
+            {% if mes or categoria %}
+                <a class="btn btn-outline-light" href="{{ url_for('dashboard') }}">Limpar</a>
+            {% endif %}
+        </div>
+    </form>
+</section>
+
+<section class="row g-3 summary-grid" aria-label="Resumo">
+    <div class="col-12 col-sm-6 col-xl-4">
+        <article class="summary-card summary-blue h-100">
+            <span class="summary-icon">R$</span>
+            <div>
+                <p>Total exibido</p>
+                <strong>R$ {{ "%.2f"|format(total) }}</strong>
+            </div>
+        </article>
+    </div>
+    <div class="col-12 col-sm-6 col-xl-4">
+        <article class="summary-card summary-green h-100">
+            <span class="summary-icon">↗</span>
+            <div>
+                <p>Categorias com gastos</p>
+                <strong>{{ totais_categoria|length }}</strong>
+            </div>
+        </article>
+    </div>
+    <div class="col-12 col-sm-6 col-xl-4">
+        <article class="summary-card summary-yellow h-100">
+            <span class="summary-icon">#</span>
+            <div>
+                <p>Gastos exibidos</p>
+                <strong>{{ gastos|length }}</strong>
+            </div>
+        </article>
+    </div>
+</section>
+
+<section class="panel chart-panel">
+    <div class="section-heading">
+        <div>
+            <h2>Gastos por categoria</h2>
+            <p>Comparação dos valores no período filtrado.</p>
+        </div>
+    </div>
+    {% if totais_categoria %}
+        <div class="chart-wrap">
+            <canvas id="graficoCategorias" aria-label="Gráfico de gastos por categoria" role="img"></canvas>
+        </div>
+        <script id="dados-grafico" type="application/json">{{ totais_categoria|tojson }}</script>
+    {% else %}
+        <div class="empty-state compact-empty">
+            <span class="empty-icon">▥</span>
+            <p>Cadastre gastos para visualizar o gráfico.</p>
+        </div>
+    {% endif %}
+</section>
+
+<section class="panel expenses-panel">
+    <div class="section-heading d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+        <div>
+            <h2>Meus gastos</h2>
+            <p>Seus lançamentos mais recentes.</p>
+        </div>
+        <span class="result-count">{{ gastos|length }} lançamento{% if gastos|length != 1 %}s{% endif %}</span>
+    </div>
 
     {% if gastos %}
-        <ul>
-            {% for gasto in gastos %}
-                <li>
-                    {{ gasto[1] }} — R$ {{ "%.2f"|format(gasto[2]) }}
-                    — {{ gasto[3] }} — {{ gasto[4] }}
-                    <a href="{{ url_for('editar_gasto', gasto_id=gasto[0]) }}">Editar</a>
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>Nenhum gasto cadastrado.</p>
-    {% endif %}
-        <div class = 'container'>
-
-            {% with mensagens = get_flashed_messages() %}
-                {% if mensagens %}
-                    {% for mensagem in mensagens %}
-                        <p>{{ mensagem }}</p>
+        <div class="table-responsive expenses-table-wrap">
+            <table class="table align-middle expenses-table mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">Data</th>
+                        <th scope="col">Descrição</th>
+                        <th scope="col">Categoria</th>
+                        <th scope="col" class="text-end">Valor</th>
+                        <th scope="col" class="text-end">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for gasto in gastos %}
+                        <tr>
+                            <td class="text-nowrap">{{ gasto[4][8:10] }}/{{ gasto[4][5:7] }}/{{ gasto[4][0:4] }}</td>
+                            <td class="expense-description">{{ gasto[1] }}</td>
+                            <td><span class="category-pill">{{ gasto[3] }}</span></td>
+                            <td class="text-end text-nowrap expense-amount">R$ {{ "%.2f"|format(gasto[2]) }}</td>
+                            <td>
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a class="btn btn-sm btn-outline-info" href="{{ url_for('editar_gasto', gasto_id=gasto[0]) }}">Editar</a>
+                                    <form method="POST" action="{{ url_for('remover_gasto', gasto_id=gasto[0]) }}" onsubmit="return confirm('Deseja excluir este gasto?')">
+                                        <button class="btn btn-sm btn-outline-danger" type="submit">Excluir</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
                     {% endfor %}
-                {% endif %}
-            {% endwith %}
-
-            <form method = "POST" action="{{ url_for ('logout') }}">
-                <button type="submit">Sair</button>
-            </form>
-
+                </tbody>
+            </table>
         </div>
+    {% else %}
+        <div class="empty-state">
+            <span class="empty-icon">＋</span>
+            <h3>Nenhum gasto por aqui</h3>
+            <p>Adicione seu primeiro gasto ou ajuste os filtros.</p>
+            <a class="btn btn-primary" href="{{ url_for('novo_gasto') }}">Adicionar gasto</a>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}
 
-    </main>
-
-</body>
-</html>
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard-filters.js') }}"></script>
+{% if totais_categoria %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endif %}
+{% endblock %}

@@ -1,4 +1,4 @@
-from models import criar_tabelas, buscar_usuario_por_id, salvar_usuario, buscar_usuario_por_email, listar_gastos_usuario, salvar_gasto, atualizar_gasto, buscar_gasto_por_id, excluir_gasto
+from models import criar_tabelas, buscar_usuario_por_id, salvar_usuario, buscar_usuario_por_email, listar_gastos_usuario, totais_por_categoria, salvar_gasto, atualizar_gasto, buscar_gasto_por_id, excluir_gasto
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -79,8 +79,27 @@ def login():
 @app.route('/dashboard', methods = ['GET'])
 @login_required
 def dashboard():
+    mes = request.args.get("mes")
+    categoria = request.args.get("categoria")
+
+    gastos = listar_gastos_usuario(current_user.id, mes, categoria)
+
+    total = sum(gasto[2] for gasto in gastos)
+    totais_categoria = totais_por_categoria(current_user.id, mes, categoria)
+    return render_template(
+        "dashboard.html",
+        gastos=gastos,
+        mes=mes,
+        categoria=categoria,
+        total=total,
+        totais_categoria=totais_categoria
+    )
+
+@app.route("/gastos")
+@login_required
+def lista_gastos():
     gastos = listar_gastos_usuario(current_user.id)
-    return render_template("dashboard.html", gastos = gastos)
+    return render_template("gastos.html", gastos=gastos)
 
 @app.route('/logout', methods = ['POST'])
 @login_required

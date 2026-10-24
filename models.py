@@ -75,22 +75,62 @@ def buscar_usuario_por_email(email):
             conexao.close()
 
 
-def listar_gastos_usuario(id_usuario):
+def listar_gastos_usuario(id_usuario, mes = None, categoria = None):
     conexao = None
     try:
         with conectar() as conexao:
             cursor  = conexao.cursor()
-            cursor.execute(
-                """
+            consulta =   """
                 SELECT id, descricao, valor, categoria, data 
                 FROM gastos
                 WHERE usuario_id = ?
-                ORDER BY data DESC
-                """,
-                (id_usuario,)
-            )
+                """
+            parametros = [id_usuario]
+
+            if mes:
+                consulta += " AND data LIKE ?"
+                parametros.append(f"{mes}-%")
+
+            if categoria:
+                consulta += " AND categoria = ?"
+                parametros.append(categoria)
+
+            consulta += " ORDER BY data DESC"
+
+            cursor.execute(consulta, parametros)
+            
             gastos = cursor.fetchall()
             return gastos
+
+    finally:
+        if conexao is not None:
+            conexao.close()
+
+def totais_por_categoria(id_usuario, mes=None, categoria=None):
+    conexao = None
+    try:
+        with conectar() as conexao:
+            cursor = conexao.cursor()
+
+            consulta = """
+                SELECT categoria, SUM(valor)
+                FROM gastos
+                WHERE usuario_id = ?
+            """
+            parametros = [id_usuario]
+
+            if mes:
+                consulta += " AND data LIKE ?"
+                parametros.append(f"{mes}-%")
+
+            if categoria:
+                consulta += " AND categoria = ?"
+                parametros.append(categoria)
+
+            consulta += " GROUP BY categoria ORDER BY SUM(valor) DESC"
+
+            cursor.execute(consulta, parametros)
+            return cursor.fetchall()
 
     finally:
         if conexao is not None:
@@ -167,7 +207,7 @@ def excluir_gasto(gasto_id, usuario_id):
 
     finally:
         conexao.close()
-        
+
 def criar_tabelas():
     conexao = None
     try:

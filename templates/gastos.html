@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Lista de gastos{% endblock %}
+
+{% block content %}
+<section class="page-heading d-flex flex-column flex-md-row align-items-md-end justify-content-between gap-3">
+    <div>
+        <span class="eyebrow">LANÇAMENTOS</span>
+        <h1>Lista de gastos</h1>
+        <p>Consulte e organize seus gastos cadastrados.</p>
+    </div>
+    <a class="btn btn-primary" href="{{ url_for('novo_gasto') }}">＋ Novo gasto</a>
+</section>
+
+<section class="panel expenses-panel">
+    {% if gastos %}
+        <div class="table-responsive expenses-table-wrap">
+            <table class="table align-middle expenses-table mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">Data</th>
+                        <th scope="col">Descrição</th>
+                        <th scope="col">Categoria</th>
+                        <th scope="col" class="text-end">Valor</th>
+                        <th scope="col" class="text-end">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for gasto in gastos %}
+                        <tr>
+                            <td>{{ gasto[4][8:10] }}/{{ gasto[4][5:7] }}/{{ gasto[4][0:4] }}</td>
+                            <td class="expense-description">{{ gasto[1] }}</td>
+                            <td><span class="category-pill">{{ gasto[3] }}</span></td>
+                            <td class="text-end expense-amount">R$ {{ "%.2f"|format(gasto[2]) }}</td>
+                            <td>
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a class="btn btn-sm btn-outline-info" href="{{ url_for('editar_gasto', gasto_id=gasto[0]) }}">Editar</a>
+                                    <form method="POST" action="{{ url_for('remover_gasto', gasto_id=gasto[0]) }}">
+                                        <button class="btn btn-sm btn-outline-danger" type="submit">Excluir</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <span class="empty-icon">＋</span>
+            <h2>Nenhum gasto cadastrado</h2>
+            <p>Quando você adicionar um gasto, ele aparecerá nesta lista.</p>
+            <a class="btn btn-primary" href="{{ url_for('novo_gasto') }}">Adicionar gasto</a>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}
