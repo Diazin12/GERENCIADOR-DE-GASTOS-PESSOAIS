@@ -2,6 +2,10 @@
 
 Aplicação web para registrar e acompanhar gastos pessoais. Cada usuário cria uma conta e acessa seus próprios lançamentos, com filtros por mês e categoria, resumo dos valores e gráfico por categoria.
 
+## Aplicação publicada
+
+[Acessar o Gerenciador de Gastos](https://gerenciador-de-gastos-pessoais.onrender.com)
+
 ## Funcionalidades
 
 - Cadastro de usuário e login/logout.
