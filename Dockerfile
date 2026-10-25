@@ -7,6 +7,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app/ ./app/
 
-EXPOSE 5000
+EXPOSE 10000
 
-CMD ["gunicorn", "--chdir", "app", "-b", "0.0.0.0:5000", "app:app"]
+CMD ["sh", "-c", "gunicorn --chdir app --bind 0.0.0.0:${PORT:-10000} app:app"]

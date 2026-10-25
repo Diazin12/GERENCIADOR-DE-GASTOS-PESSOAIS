@@ -24,3 +24,4 @@ services:
     restart: unless-stopped
     environment:
       TZ: America/Sao_Paulo
+      PORT: "5000"
