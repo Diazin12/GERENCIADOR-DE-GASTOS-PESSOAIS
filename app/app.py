@@ -9,7 +9,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 
-app.secret_key = os.environ["SECRET_KEY"]
+app.secret_key = os.environ["SECRET_KEY"], "chave-so-para-testes"
 
 criar_tabelas()
 
